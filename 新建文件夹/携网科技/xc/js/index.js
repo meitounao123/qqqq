@@ -1,0 +1,14 @@
+var carousels={rootElem:null,scrollElem:null,anchorElem:null,distance:0,duration:5000,total:0,index:0,timer:null,enter:function(elem){this.rootElem=elem;this.scrollElem=elem.children(".img-list");this.anchorElem=elem.children(".anchor");this.init();this.windowChange();this.createAnchor();this.setTimer();this.mouseEnter();this.mouseLeave();},init:function(){this.distance=parseFloat(this.rootElem.css("width"));this.total=this.rootElem.find(".item").length;this.scrollElem.css("width",this.distance*this.total+"px").children(".item").css("width",this.distance+"px");},createAnchor:function(){var html="";for(var n=0;n<this.total;n++){if(n==this.index){html+="<li class='active' data-k='"+ n+"'></li>";}else{html+="<li data-k='"+ n+"'></li>";}}
+this.rootElem.children(".anchor").html(html);},windowChange:function(){$(window).resize(function(){this.init();}.bind(this))},setTimer:function(){this.timer=window.setInterval(function(){this.index=(Number(this.index)+ 1)%this.total;this.startScroll();}.bind(this),this.duration)},clearTimer:function(){window.clearInterval(this.timer);this.timer=null;},startScroll:function(){var per=Number(100/this.total*(-this.index))+"%";this.scrollElem.css({"transform":"translate3d("+ per+",0,0)","WebkitTransform":"translate3d("+ per+",0,0)","msTransform":"translateX("+ per+")"});this.anchorElem.children(".active").removeClass("active").siblings("[data-k="+ this.index+"]").addClass("active");},mouseEnter:function(){this.anchorElem.delegate("li","mouseenter",function(e){this.clearTimer();var k=$(e.target).attr("data-k");if(this.index!=k){this.index=k;this.startScroll();}}.bind(this))},mouseLeave:function(){this.anchorElem.delegate("li","mouseleave",function(e){this.setTimer();}.bind(this))}}
+carousels.enter($("#carousels"))
+$(function(){var dateFormatFunc=function(data){var obj=new Date(data);return obj.getFullYear()+"."+(Number(obj.getMonth())+1)+"."+obj.getDate();}
+$.get("./GetAllNews",{pageIndex:1,title:"",tag:"热点"},function(rep){console.log(rep);var news=rep.Data;$(".news .content .paths").html(function(){var html="";for(var n=1;n<5&&n<news.length;n++){html+='<li id="news'+(parseInt(Number(n))+ 1)+'" data-listen-scroll data-key="'+news[n].ID+'">'
++'<p class="point">'
++ news[n].Title
++'</p>'
++'<p class="time">'
++ dateFormatFunc(news[n].Datetime)
++'</p>'
++'</li>';}
+return html;}).delegate("li","click",function(){window.location.href="news/"+ this.dataset.key+".html";}).siblings(".info").html(function(){var html="<p class='cn'>"+news[0].Title+"</p>";html+="<p class='en'>"+dateFormatFunc(news[0].Datetime)+"</p>";var txt="<p class='text'>"+news[0].Desc+"</p>";$(this).html(html+txt);}).children(".cn,.en,.text").bind("click",function(){window.location.href="news/"+ news[0].ID+".html";})
+$(".news .paths [data-listen-scroll]").each(function(i,item){if($(item).isInDisplayArea(parseFloat(item.style.height))){$(item).removeAttr('data-listen-scroll');}})})})
